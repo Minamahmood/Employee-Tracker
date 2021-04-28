@@ -240,3 +240,58 @@ function addEmployeeRole() {
             );
         });
 }
+
+function addEmployee() {
+    connection.query("SELECT title FROM role", function(err, resolts) {
+        if (err) throw err;
+        inquirer
+            .prompt([{
+                    type: "input",
+                    name: "firstName",
+                    message: "Enter employee first name",
+                },
+                {
+                    type: "input",
+                    name: "lasttName",
+                    message: "Enter employee last name",
+                },
+                {
+                    type: "rawlist",
+                    name: "role",
+                    choices: function() {
+                        let choiceArr = [];
+                        for (i = 0; i < results.length; i++) {
+                            choicesArr.push(resolts[i].title);
+                        }
+                        return choicesArr;
+                    },
+                    massage: "select title",
+                },
+                {
+                    type: "number",
+                    name: "manager",
+
+                    validate: function(value) {
+                        if (isNaN(value) === false) {
+                            return true;
+                        }
+                        return false;
+                    },
+                    message: "Enter manager ID",
+                    default: "1",
+                },
+            ])
+            .then(function(answer) {
+                connection.query("INSERT INTO employee SET ?", {
+                    first_name: answer.firstName,
+                    last_name: answer.lastName,
+                    role_id: answer.role,
+                    manager_id: answer.manager,
+                });
+                console.log("-----------------");
+                console.log("Employee added successfuly");
+                console.log("------------");
+                start();
+            });
+    });
+}
