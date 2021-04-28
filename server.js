@@ -192,3 +192,51 @@ function addDepartment() {
             );
         });
 }
+
+function addEmployeeRole() {
+    inquirer
+        .prompt([{
+                type: "input",
+                name: "role",
+                message: "Enter role title:",
+            },
+            {
+                type: "number",
+                name: "salary",
+                message: "Enter salary",
+                validate: function(value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            {
+                type: "number",
+                name: "department_id",
+                message: "Enter department id",
+                validate: function(value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                },
+            },
+        ])
+        .then(function(answer) {
+            connection.query(
+                "INSERT INTO role set?", {
+                    title: answer.role,
+                    salary: answer.salary,
+                    department_id: answer.department_id,
+                },
+                function(err) {
+                    if (err) throw err;
+                    console.log("-----------------");
+                    console.log("Employee Roles updated with" * answer.role);
+                    console.log("------------");
+                    start();
+                }
+            );
+        });
+}
