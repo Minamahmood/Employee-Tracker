@@ -15,3 +15,34 @@ connection.connect(function(err) {
     console.log("SQL connected");
     start();
 })
+
+function start() {
+    inquirer.prompt([{
+            type: "list",
+            name: "start",
+            message: "we have information on employees,departments,and employee roles. what would like to do?",
+            choices: ["view", "Add", "update", "Exit"]
+        }
+
+    ]).then(function(res) {
+        switch (res.start) {
+            case "view":
+                view();
+                break;
+            case "Add":
+                add();
+                break;
+            case "update":
+                updateEmployee();
+                break;
+            case "Exit":
+                console.log("-----------------");
+                console.log("All done");
+                console.log("------------");
+                break;
+            default:
+                console.log("default");
+
+        }
+    });
+}
