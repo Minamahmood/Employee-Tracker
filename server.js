@@ -297,11 +297,10 @@ function addEmployee() {
 }
 
 function updateEmployee() {
-    connection.query("SELECT * FROM employee",
-        function(err, resolts) {
-            if (err) throw err;
-            inquirer.prompt([{
-
+    connection.query("SELECT * FROM employee", function(err, resolts) {
+        if (err) throw err;
+        inquirer
+            .prompt([{
                 type: "rawlist",
                 name: "choice",
                 choices: function() {
@@ -309,15 +308,16 @@ function updateEmployee() {
                     for (i = 0; i < results.length; i++) {
                         choicesArr.push(resolts[i].last_name);
                     }
-                    return choicesArr
+                    return choicesArr;
                 },
                 massage: "select employee to update",
-            }]).then(function(answer) {
-                    const saveName = answer.choices;
-                    connection.query("SELECT * FROM employee",
-                        function(err, resolts) {
-                            if (err) throw err;
-                            inquirer.prompt([{
+            }, ])
+            .then(function(answer) {
+                const saveName = answer.choices;
+                connection.query("SELECT * FROM employee", function(err, resolts) {
+                    if (err) throw err;
+                    inquirer
+                        .prompt([{
                                 type: "rawlist",
                                 name: "role",
                                 choices: function() {
@@ -325,34 +325,39 @@ function updateEmployee() {
                                     for (i = 0; i < results.length; i++) {
                                         choicesArr.push(resolts[i].role_id);
                                     }
-                                    return choicesArr
+                                    return choicesArr;
                                 },
                                 massage: "select title",
-                            } {
+                            },
+                            {
                                 type: "number",
                                 name: "manager",
 
                                 validate: function(value) {
                                     if (isNaN(value) === false) {
                                         return true;
-
                                     }
                                     return false;
                                 },
                                 message: "Enter manager ID",
-                                default: "1"
-                            }]).then(function(answer) {
-                                    console.log(answer);
-                                    console.log(saveName);
-                                    connection.query("UPDATE employee SET ? WHERE last_name = ?", [{
-                                            role_id: answer.role,
-                                            manager_id: answer.manager
-                                        }, saveName],
+                                default: "1",
+                            },
+                        ])
+                        .then(function(answer) {
+                            console.log(answer);
+                            console.log(saveName);
+                            connection.query("UPDATE employee SET ? WHERE last_name = ?", [{
+                                        role_id: answer.role,
+                                        manager_id: answer.manager,
                                     },
-                                },
-                                console.log("-----------------"); console.log("Employee update"); console.log("------------"); start();
-                            });
-                    })
-            })
-    })
+                                    saveName,
+                                ]),
+                                console.log("-----------------");
+                            console.log("Employee update");
+                            console.log("------------");
+                            start();
+                        });
+                });
+            });
+    });
 }
