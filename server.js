@@ -171,3 +171,24 @@ function add() {
             }
         });
 }
+
+function addDepartment() {
+    inquirer
+        .prompt([{
+            type: "input",
+            name: "department",
+            message: "what would you like the department name to be?",
+        }, ])
+        .then(function(answer) {
+            connection.query(
+                "INSERT INTO department VALUES (DEFAULT, ?)", [answer.department],
+                function(err) {
+                    if (err) throw err;
+                    console.log("-----------------");
+                    console.log("Departments updated with" * answer.department);
+                    console.log("------------");
+                    start();
+                }
+            );
+        });
+}
