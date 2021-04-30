@@ -1,13 +1,13 @@
-const inquirer = requier("inquirer");
-const mysql = requier("mysql");
-const cTable = requier("console.table");
+const inquirer = require("inquirer");
+const mysql = require("mysql");
+const cTable = require("console.table");
 
-const connection = mysql.ceateConnection({
+const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
     password: "password",
-    database: "employee_db",
+    database: "employees",
 });
 
 connection.connect(function(err) {
@@ -52,7 +52,7 @@ function view() {
             type: "list",
             name: "view",
             message: "select one to view",
-            choices: ["All employee", "By department", "By role"],
+            choices: ["All employees", "By department", "By role"],
         }, ])
         .then(function(res) {
             switch (res.view) {
@@ -77,38 +77,76 @@ function view() {
 }
 
 function viewAllEmployees() {
-    connection.query(
-        "SELECT e.id AS ID, e.first_name AS First, e.last_name AS Last, e.role_id AS Role, r.salary, m.last_name AS Manager, d.name AS Department FROM employee e LEFT JOIN employee m.ON e.manager_id m.id LEFT JOIN role r ON e.role_id = r.title LEFT JOIN department d ON r.department_id =  d.id",
-        function(err, results) {
-            if (err) throw err;
-            console.table(results);
-            start();
-        }
-    );
+    // connection.query(
+    //     "SELECT employee.id AS ID, employee.first_name AS First, employee.last_name AS Last, employee.role_id AS Role, role.salary, manager.last_name AS Manager, department.name AS Department FROM employee  LEFT JOIN employee manager.ON employee.manager_id manager.id LEFT JOIN role  ON employee.role_id = role.title LEFT JOIN department  ON role.department_id =  department.id",
+    //     function(err, results) {
+    //         if (err) throw err;
+    //         console.table(results);
+    //         start();
+    //     }
+    // );
+    connection.query("SELECT * FROM employee", function(err, results) {
+        console.table(results);
+        start();
+        if (err) throw err;
+        // inquirer
+        //     .prompt([{
+        //         type: "rawlist",
+        //         name: "choice",
+        //         choices: function() {
+        //             let choicesArr = [];
+        //             for (i = 0; i < results.length; i++) {
+        //                 choicesArr.push(
+        //                     results[i].first_name + " " + results[i].last_name
+        //                 );
+        //             }
+
+        //             return choicesArr;
+        //         },
+        //         massage: "select employee",
+        //     }, ])
+        //     .then(function(answer) {
+        //         console.log(answer, "answer");
+        //         connection.query(
+        //             "SELECT employee.id AS ID, employee.first_name AS First, employee.last_name AS Last, employee.role_id AS Role, role.salary, manager.last_name AS Manager, department.name AS Department FROM employee  LEFT JOIN employee, manager.ON, employee.manager_id, manager.id LEFT JOIN role  ON employee.role_id = role.title LEFT JOIN department  ON role.department_id =  department.id WHERE employee.name =?", [answer.choice],
+        //             function(err, results) {
+        //                 if (err) throw err;
+        //                 console.table(results);
+        //                 start();
+        //             }
+        //         );
+        //     });
+    });
 }
 
 function viewByDepartment() {
-    connection.query("SELECT *FRON department", function(err, resolts) {
+    connection.query("SELECT *FROM department", function(err, results) {
         if (err) throw err;
         inquirer
             .prompt([{
                 type: "rawlist",
                 name: "choice",
                 choices: function() {
-                    let choiceArr = [];
+                    let choicesArr = [];
                     for (i = 0; i < results.length; i++) {
-                        choicesArr.push(resolts[i].name);
+                        const opj = {
+                            name: results[i].name,
+                            value: results[i].id,
+                        };
+                        choicesArr.push(opj);
                     }
                     return choicesArr;
                 },
                 massage: "select department",
             }, ])
             .then(function(answer) {
+                console.log(answer);
                 connection.query(
-                    "SELECT e.id AS ID, e.first_name AS First, e.last_name AS Last, e.role_id AS Role, r.salary, m.last_name AS Manager, d.name AS Department FROM employee e LEFT JOIN employee m.ON e.manager_id m.id LEFT JOIN role r ON e.role_id = r.title LEFT JOIN department d ON r.department_id =  d.id WHERE d.name =?", [answer.choice],
+                    "SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department department on role.department_id = department.id WHERE department.id = ?;",
+                    answer.choice,
                     function(err, results) {
                         if (err) throw err;
-                        console.table(resolts);
+                        console.table(results);
                         start();
                     }
                 );
@@ -117,28 +155,35 @@ function viewByDepartment() {
 }
 
 function viewByRole() {
-    connection.query("SELECT title FROM role", function(err, resolts) {
+    connection.query("SELECT id, title FROM role", function(err, results) {
         if (err) throw err;
         inquirer
             .prompt([{
                 type: "rawlist",
                 name: "choice",
+                massage: "select role",
                 choices: function() {
                     let choiceArr = [];
                     for (i = 0; i < results.length; i++) {
-                        choicesArr.push(resolts[i].title);
+                        const opj = {
+                            name: results[i].title,
+                            value: results[i].id,
+                        };
+                        choiceArr.push(opj);
                     }
-                    return choicesArr;
+                    return choiceArr;
                 },
-                massage: "select role",
             }, ])
             .then(function(answer) {
-                console.log(answer.choice);
+                console.log(answer);
+
                 connection.query(
-                    "SELECT e.id AS ID, e.first_name AS First, e.last_name AS Last, e.role_id AS Role, r.salary, m.last_name AS Manager, d.name AS Department FROM employee e LEFT JOIN employee m.ON e.manager_id m.id LEFT JOIN role r ON e.role_id = r.title LEFT JOIN department d ON r.department_id =  d.id WHERE d.name =?", [answer.choice],
+                    "select * from employee where employee.role_id = ?",
+                    answer.choice,
+
                     function(err, results) {
                         if (err) throw err;
-                        console.table(resolts);
+                        console.table(results);
                         start();
                     }
                 );
@@ -297,16 +342,16 @@ function addEmployee() {
 }
 
 function updateEmployee() {
-    connection.query("SELECT * FROM employee", function(err, resolts) {
+    connection.query("SELECT * FROM employee", function(err, results) {
         if (err) throw err;
         inquirer
             .prompt([{
                 type: "rawlist",
                 name: "choice",
                 choices: function() {
-                    let choiceArr = [];
+                    let choicesArr = [];
                     for (i = 0; i < results.length; i++) {
-                        choicesArr.push(resolts[i].last_name);
+                        choicesArr.push(results[i].last_name);
                     }
                     return choicesArr;
                 },
@@ -314,16 +359,16 @@ function updateEmployee() {
             }, ])
             .then(function(answer) {
                 const saveName = answer.choices;
-                connection.query("SELECT * FROM employee", function(err, resolts) {
+                connection.query("SELECT * FROM employee", function(err, results) {
                     if (err) throw err;
                     inquirer
                         .prompt([{
                                 type: "rawlist",
                                 name: "role",
                                 choices: function() {
-                                    let choiceArr = [];
+                                    let choicesArr = [];
                                     for (i = 0; i < results.length; i++) {
-                                        choicesArr.push(resolts[i].role_id);
+                                        choicesArr.push(results[i].role_id);
                                     }
                                     return choicesArr;
                                 },

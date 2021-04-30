@@ -19,7 +19,11 @@
   },
   "homepage": "https://github.com/Minamahmood/Employee-Tracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "express": "^4.17.1",
+    "inquire": "^0.4.8",
+    "inquirer": "^8.0.0",
+    "mysql": "^2.18.1",
     "mysql2": "^2.2.5"
   }
 }
